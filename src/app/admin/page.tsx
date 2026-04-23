@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Activity, Bell, Users, ShieldAlert, Clock, MapPin, Send, CheckCircle } from 'lucide-react';
 import LeadTimeProofChart from '@/components/charts/LeadTimeProofChart';
+import FestivalCalendarWidget from '@/components/dashboard/FestivalCalendarWidget';
 
 const DynamicMap = dynamic(() => import('@/components/dashboard/DynamicMap'), { ssr: false });
 
@@ -115,6 +116,10 @@ export default function AdminDashboard() {
           <div className="bg-gov-card border border-gov-border rounded-xl p-6 shadow-lg">
             <h3 className="text-lg font-bold text-white mb-4">Nalam AI vs IDSP Lead Time Proof</h3>
             <LeadTimeProofChart />
+          </div>
+
+          <div className="mt-8">
+            <FestivalCalendarWidget />
           </div>
         </div>
 

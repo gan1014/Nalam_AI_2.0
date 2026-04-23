@@ -1,10 +1,10 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Bell, Search, Filter, AlertTriangle, Send, Mail, Smartphone, Eye, CheckCircle2 } from 'lucide-react';
 import { tnDistricts } from '@/lib/district-data';
 import { useSearchParams } from 'next/navigation';
 
-export default function AlertsDispatchPage() {
+function AlertsDispatchContent() {
   const searchParams = useSearchParams();
   const filterWard = searchParams.get('ward');
   const [district, setDistrict] = useState('Chennai');
@@ -70,7 +70,7 @@ export default function AlertsDispatchPage() {
         if (res.ok) {
           setActiveAlerts(prev => prev.map(a => a.id === id ? { ...a, status: 'DISPATCHED' } : a));
         } else {
-          alert('Failed to send email. Check API logs.');
+          window.alert('Failed to send email. Check API logs.');
         }
       } catch (err) {
         console.error(err);
@@ -168,6 +168,7 @@ export default function AlertsDispatchPage() {
             <div className="bg-gov-card border border-gov-border rounded-xl shadow-lg overflow-hidden flex flex-col h-full animate-in fade-in zoom-in-95 duration-200">
               {(() => {
                 const alert = activeAlerts.find(a => a.id === selectedAlert);
+                if (!alert) return <div className="p-12 text-center text-gray-500">Alert not found.</div>;
                 return (
                   <>
                     <div className={`p-6 border-b ${
@@ -278,5 +279,13 @@ export default function AlertsDispatchPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AlertsDispatchPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-white">Loading Command Center...</div>}>
+      <AlertsDispatchContent />
+    </Suspense>
   );
 }

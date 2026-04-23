@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import GovHeader from '@/components/layout/GovHeader';
-import GovFooter from '@/components/layout/GovFooter';
+import DrNalamChatbot from '@/components/chatbot/DrNalamChatbot';
 
 export const metadata: Metadata = {
   title: {
@@ -26,12 +25,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-screen flex flex-col bg-gov-offwhite text-gov-dark">
-        <GovHeader />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <GovFooter />
+      <body className="antialiased min-h-screen flex flex-col bg-gov-offwhite text-gov-dark overflow-x-hidden">
+        {children}
+        <DrNalamChatbot />
       </body>
     </html>
   );

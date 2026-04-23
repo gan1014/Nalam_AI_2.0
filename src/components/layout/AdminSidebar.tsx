@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Map, Bell, TrendingUp, FileText, CheckCircle, Package, LogOut } from 'lucide-react';
+import { LayoutDashboard, Map, Bell, TrendingUp, FileText, CheckCircle, Package, LogOut, Activity } from 'lucide-react';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -12,6 +12,7 @@ export default function AdminSidebar() {
     { name: 'Risk Map', href: '/admin/risk-map', icon: <Map size={20} /> },
     { name: 'Alerts & Dispatch', href: '/admin/alerts', icon: <Bell size={20} /> },
     { name: 'Disease Forecasts', href: '/admin/forecasts', icon: <TrendingUp size={20} /> },
+    { name: 'District Risk Index', href: '/admin/district-ranking', icon: <Activity size={20} /> },
     { name: 'Resource Mobilisation', href: '/admin/resources', icon: <Package size={20} /> },
     { name: 'PS08 Evaluation', href: '/evaluation', icon: <CheckCircle size={20} /> },
     { name: 'Audit Logs', href: '/admin/audit-logs', icon: <FileText size={20} /> },

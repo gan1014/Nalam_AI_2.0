@@ -14,6 +14,7 @@ const GovHeader = () => {
     { name: 'Public Health Portal', href: '/' },
     { name: 'PHC Finder', href: '/public-portal/phc-finder' },
     { name: 'Medicine Tracker', href: '/public-portal/pharmacy' },
+    { name: 'Report Analysis', href: '/public-portal/report-analysis' },
   ];
 
   return (
