@@ -1,16 +1,21 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, MapPin, Activity } from 'lucide-react';
 
 const CommunitySurgeMap = () => {
-  // Generate random dots around TN region for visual effect
-  const dots = Array.from({ length: 12 }, (_, i) => ({
-    id: i,
-    top: `${20 + Math.random() * 60}%`,
-    left: `${30 + Math.random() * 40}%`,
-    size: Math.random() > 0.7 ? 'w-4 h-4' : 'w-2 h-2',
-    opacity: 0.3 + Math.random() * 0.7
-  }));
+  const [dots, setDots] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Generate random dots only on client to prevent hydration mismatch
+    const generatedDots = Array.from({ length: 12 }, (_, i) => ({
+      id: i,
+      top: `${20 + Math.random() * 60}%`,
+      left: `${30 + Math.random() * 40}%`,
+      size: Math.random() > 0.7 ? 'w-4 h-4' : 'w-2 h-2',
+      opacity: 0.3 + Math.random() * 0.7
+    }));
+    setDots(generatedDots);
+  }, []);
 
   return (
     <div className="bg-[#0f172a] rounded-2xl border border-slate-800 p-6 shadow-2xl overflow-hidden relative min-h-[400px]">

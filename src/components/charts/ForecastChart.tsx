@@ -57,7 +57,7 @@ export default function ForecastChart({ disease = 'dengue' }: { disease?: string
   );
   
   return (
-    <div className="w-full h-[340px] bg-slate-900/30 rounded-xl p-4 border border-slate-800/50">
+    <div className="w-full h-[340px] bg-slate-900/30 rounded-xl p-4 border border-slate-800/50" style={{ minWidth: 0 }}>
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data} margin={{ top:20, right:30, left:0, bottom:20 }}>
           <defs>

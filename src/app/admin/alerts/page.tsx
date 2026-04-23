@@ -3,6 +3,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { Bell, Search, Filter, AlertTriangle, Send, Mail, Smartphone, Eye, CheckCircle2 } from 'lucide-react';
 import { tnDistricts } from '@/lib/district-data';
 import { useSearchParams } from 'next/navigation';
+import FaceRecognitionModal from '@/components/admin/FaceRecognitionModal';
 
 function AlertsDispatchContent() {
   const searchParams = useSearchParams();
@@ -11,6 +12,8 @@ function AlertsDispatchContent() {
   const [selectedAlert, setSelectedAlert] = useState<number | null>(null);
   const [testPhone, setTestPhone] = useState('+91');
   const [isSending, setIsSending] = useState(false);
+  const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
+  const [pendingDispatchData, setPendingDispatchData] = useState<{id: number, type: 'SMS' | 'EMAIL'} | null>(null);
 
   const initialAlerts = [
     { id: 1042, district: 'Chennai', ward: 'Teynampet', disease: 'Dengue', risk: 'CRITICAL', trigger: 'LSTM > 95th Percentile + Rainfall threshold', confidence: '96.8%', primaryFactor: 'Unseasonal rainfall (84mm) + high larval density in Zone 9.', recommendation: 'Immediate fogging and source reduction in Teynampet. Alert PHCs.', affected: 45000, date: 'Today, 08:30 AM', status: 'PENDING DISPATCH' },
@@ -52,6 +55,17 @@ function AlertsDispatchContent() {
 
   const handleDispatch = async (id: number, type: 'SMS' | 'EMAIL') => {
     if (type === 'EMAIL') {
+      // REQUIRE FACE RECOGNITION FIRST
+      setPendingDispatchData({ id, type });
+      setIsFaceModalOpen(true);
+      return;
+    }
+    
+    await executeDispatch(id, type);
+  };
+
+  const executeDispatch = async (id: number, type: 'SMS' | 'EMAIL') => {
+    if (type === 'EMAIL') {
       setIsSending(true);
       const alert = activeAlerts.find(a => a.id === id);
       try {
@@ -76,6 +90,7 @@ function AlertsDispatchContent() {
         console.error(err);
       } finally {
         setIsSending(false);
+        setPendingDispatchData(null);
       }
     } else if (type === 'SMS') {
       setIsSending(true);
@@ -99,12 +114,14 @@ function AlertsDispatchContent() {
         console.error(err);
       } finally {
         setIsSending(false);
+        setPendingDispatchData(null);
       }
     }
   };
 
   return (
-    <div className="w-full">
+    <>
+      <div className="w-full">
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
@@ -278,7 +295,19 @@ function AlertsDispatchContent() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+
+      <FaceRecognitionModal 
+        isOpen={isFaceModalOpen}
+        onClose={() => setIsFaceModalOpen(false)}
+        onVerified={() => {
+          if (pendingDispatchData) {
+            executeDispatch(pendingDispatchData.id, pendingDispatchData.type);
+          }
+        }}
+        adminName="Admin Ganesh"
+      />
+    </>
   );
 }
 

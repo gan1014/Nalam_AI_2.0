@@ -17,31 +17,36 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
-  timestamp: Date;
+  timestamp: string; // Changed to string for stable hydration
 }
 
 const DrNalamChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: 'வணக்கம்! நான் டாக்டர் நலம். உங்கள் அறிகுறிகளை என்னிடம் சொல்லுங்கள். \n\nHello! I\'m Dr. Nalam, your AI health assistant. Tell me your symptoms and I\'ll help you understand whether you need emergency care, a doctor visit, or home care. Remember: for emergencies, always call 108.',
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Initial message with stable timestamp on client
+    setMessages([
+      {
+        role: 'assistant',
+        content: 'வணக்கம்! நான் டாக்டர் நலம். உங்கள் அறிகுறிகளை என்னிடம் சொல்லுங்கள். \n\nHello! I\'m Dr. Nalam, your AI health assistant. Tell me your symptoms and I\'ll help you understand whether you need emergency care, a doctor visit, or home care. Remember: for emergencies, always call 108.',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ]);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (isOpen) scrollToBottom();
+  }, [messages, isOpen]);
 
   const handleSendMessage = async (e?: React.FormEvent, presetText?: string) => {
     if (e) e.preventDefault();
@@ -51,7 +56,7 @@ const DrNalamChatbot = () => {
     const userMessage: Message = {
       role: 'user',
       content: textToSend,
-      timestamp: new Date()
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -67,7 +72,7 @@ const DrNalamChatbot = () => {
             role: m.role,
             content: m.content
           })),
-          district: 'Chennai', // This could be dynamic based on user location
+          district: 'Chennai',
           language: /[\u0B80-\u0BFF]/.test(textToSend) ? 'ta' : 'en'
         })
       });
@@ -78,13 +83,13 @@ const DrNalamChatbot = () => {
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: data.text,
-          timestamp: new Date()
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }]);
-      } else if (data.error) {
+      } else {
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: 'I apologize, but I encountered an error. Please try again or visit your nearest PHC.',
-          timestamp: new Date()
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }]);
       }
     } catch (error) {
@@ -194,7 +199,6 @@ const DrNalamChatbot = () => {
                       ? 'bg-gov-teal text-white rounded-tr-none' 
                       : 'bg-slate-800 text-slate-100 border border-slate-700 rounded-tl-none shadow-md'
                   }`}>
-                    {/* Emergency detection highlighting */}
                     {m.role === 'assistant' && (m.content.includes('108') || m.content.includes('EMERGENCY')) ? (
                       <div className="space-y-3">
                         <div className="whitespace-pre-wrap">{m.content}</div>
@@ -209,7 +213,7 @@ const DrNalamChatbot = () => {
                       <div className="whitespace-pre-wrap">{m.content}</div>
                     )}
                     <div className={`text-[10px] mt-1.5 opacity-50 ${m.role === 'user' ? 'text-right' : 'text-left'}`}>
-                      {m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {m.timestamp}
                     </div>
                   </div>
                 </div>
@@ -227,7 +231,7 @@ const DrNalamChatbot = () => {
             </div>
 
             {/* Quick Actions */}
-            {messages.length < 3 && (
+            {messages.length <= 1 && (
               <div className="p-4 pt-0 flex flex-wrap gap-2">
                 {quickActions.map(action => (
                   <button 
@@ -236,7 +240,7 @@ const DrNalamChatbot = () => {
                     className="text-[10px] bg-slate-800/50 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-full transition-colors flex flex-col"
                   >
                     <span className="font-bold">{action.en}</span>
-                    <span className="font-tamil opacity-60">{action.ta}</span>
+                    <span className="font-tamil opacity-60 text-[9px]">{action.ta}</span>
                   </button>
                 ))}
               </div>

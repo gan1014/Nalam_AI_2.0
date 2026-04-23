@@ -60,7 +60,7 @@ const LeadTimeProofChart = () => {
         </div>
       </div>
 
-      <div className="h-[400px] w-full">
+      <div className="h-[400px] w-full" style={{ minWidth: 0 }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={TIMELINE_DATA} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
