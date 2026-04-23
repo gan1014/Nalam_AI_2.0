@@ -13,6 +13,13 @@ export default function PublicPortal() {
       <section className="bg-gradient-to-br from-gov-navy to-gov-blue pt-20 pb-24 px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <div className="container mx-auto max-w-6xl relative z-10 text-center">
+          {/* Official Logo */}
+          <div className="mb-8 flex justify-center">
+            <div className="bg-white p-4 rounded-3xl shadow-2xl border-b-4 border-gov-gold">
+              <img src="/images/logo.png" alt="Nalam AI Logo" className="w-24 h-24 md:w-32 md:h-32 object-contain" />
+            </div>
+          </div>
+
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white px-4 py-1.5 rounded-full text-sm font-semibold mb-6 backdrop-blur-sm">
             <ShieldCheck size={16} className="text-gov-gold" />
             AI-powered 14-21 day advance warning • 38 Districts • 5 Diseases • 77M Protected

@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import ForecastChart from '@/components/charts/ForecastChart';
+import SeasonalHeatmap from '@/components/charts/SeasonalHeatmap';
 import { TrendingUp, Calendar, Filter } from 'lucide-react';
 import { tnDistricts } from '@/lib/district-data';
 
@@ -67,13 +68,13 @@ export default function ForecastsPage() {
         <ForecastChart disease={disease} />
       </div>
 
-      {/* Seasonal Matrix Mockup */}
+      {/* Seasonal Matrix */}
       <div className="bg-gov-card border border-gov-border rounded-xl p-6 shadow-lg">
         <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
           <Calendar className="text-gov-gold" /> Seasonal Risk Matrix
         </h2>
-        <div className="h-48 border border-gov-border/50 rounded flex items-center justify-center bg-[#0d1421]">
-          <p className="text-gray-500">Seasonal Heatmap Calendar component renders here.</p>
+        <div className="p-4 border border-gov-border/50 rounded-xl bg-[#0d1421]">
+          <SeasonalHeatmap disease={disease} />
         </div>
       </div>
     </div>

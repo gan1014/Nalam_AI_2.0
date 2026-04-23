@@ -34,6 +34,8 @@ export default function RiskMapPage() {
             <option value="dengue">Dengue</option>
             <option value="scrub_typhus">Scrub Typhus</option>
             <option value="gastroenteritis">Gastroenteritis</option>
+            <option value="heat_stroke">Heat Stroke</option>
+            <option value="respiratory">Respiratory</option>
           </select>
           <button className="bg-gov-teal text-white font-bold px-4 py-2 rounded flex items-center gap-2 hover:bg-teal-600 transition-colors shadow-md">
             <Download size={16} /> Export GIS

@@ -47,8 +47,8 @@ export default function AdminLogin() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
         
         <div className="bg-gov-navy p-8 text-center border-b-4 border-gov-gold">
-          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-            <ShieldCheck size={32} className="text-gov-navy" />
+          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl border-4 border-gov-navy overflow-hidden">
+            <img src="/images/logo.png" alt="Nalam AI Logo" className="w-full h-full object-cover scale-110" />
           </div>
           <h1 className="text-2xl font-bold text-white font-tamil mb-1">நிர்வாகி உள்நுழைவு</h1>
           <h2 className="text-sm font-semibold text-gov-gold uppercase tracking-widest">Nalam AI Command Center</h2>

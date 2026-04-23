@@ -61,6 +61,13 @@ const GovHeader = () => {
                     fontSize="6" fontWeight="bold">TAMIL NADU</text>
             </svg>
           </div>
+
+          <div className="w-[1px] h-12 bg-gray-200 hidden md:block mx-1"></div>
+
+          {/* New Nalam AI Logo */}
+          <div className="w-16 h-16 shrink-0">
+            <img src="/images/logo.png" alt="Nalam AI Logo" className="w-full h-full object-contain" />
+          </div>
           
           {/* Title Block */}
           <div className="flex flex-col text-center md:text-left">

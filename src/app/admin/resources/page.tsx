@@ -56,6 +56,9 @@ export default function ResourceMobilisationPage() {
           >
             <option value="dengue">Dengue</option>
             <option value="scrub_typhus">Scrub Typhus</option>
+            <option value="gastroenteritis">Gastroenteritis</option>
+            <option value="heat_stroke">Heat Stroke</option>
+            <option value="respiratory">Respiratory</option>
           </select>
         </div>
 

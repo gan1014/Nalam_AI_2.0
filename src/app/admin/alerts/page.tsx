@@ -9,65 +9,20 @@ export default function AlertsDispatchPage() {
   const filterWard = searchParams.get('ward');
   const [district, setDistrict] = useState('Chennai');
   const [selectedAlert, setSelectedAlert] = useState<number | null>(null);
+  const [testPhone, setTestPhone] = useState('+91');
+  const [isSending, setIsSending] = useState(false);
 
-  const [activeAlerts, setActiveAlerts] = useState([
-    { 
-      id: 1042, 
-      district: 'Chennai', 
-      ward: 'Teynampet', 
-      disease: 'Dengue', 
-      risk: 'CRITICAL', 
-      trigger: 'LSTM > 95th Percentile + Rainfall threshold', 
-      confidence: '96.8%',
-      primaryFactor: 'Unseasonal rainfall (84mm) + high larval density in Zone 9.',
-      recommendation: 'Immediate fogging and source reduction in Teynampet. Alert PHCs.',
-      affected: 45000, 
-      date: 'Today, 08:30 AM', 
-      status: 'PENDING DISPATCH' 
-    },
-    { 
-      id: 1041, 
-      district: 'Chennai', 
-      ward: 'Kodambakkam', 
-      disease: 'Dengue', 
-      risk: 'CRITICAL', 
-      trigger: 'EMRI 108 Fever Call Cluster', 
-      confidence: '92.4%',
-      primaryFactor: 'Abnormal cluster of fever calls (108) reported from Ward 127.',
-      recommendation: 'Door-to-door screening in Kodambakkam. Mobile medical units deployment.',
-      affected: 9800, 
-      date: 'Today, 09:15 AM', 
-      status: 'PENDING DISPATCH' 
-    },
-    { 
-      id: 1043, 
-      district: 'Chennai', 
-      ward: 'Ambattur', 
-      disease: 'Scrub Typhus', 
-      risk: 'HIGH', 
-      trigger: 'Community Report Cluster Detected', 
-      confidence: '88.5%',
-      primaryFactor: 'Community symptoms matching scrub typhus in slum areas.',
-      recommendation: 'Targeted antibiotic stocking at Ambattur PHC. Public awareness on sanitation.',
-      affected: 12000, 
-      date: 'Today, 09:15 AM', 
-      status: 'PENDING DISPATCH' 
-    },
-    { 
-      id: 1038, 
-      district: 'Coimbatore', 
-      ward: 'Zone 4', 
-      disease: 'Respiratory', 
-      risk: 'WATCH', 
-      trigger: 'Syndromic surveillance spike at PHC', 
-      confidence: '84.2%',
-      primaryFactor: 'PM2.5 levels exceeding WHO limits for 48 hours.',
-      recommendation: 'Air quality advisory for elderly. Stock inhalers at Zone 4 PHCs.',
-      affected: 8500, 
-      date: 'Yesterday', 
-      status: 'DISPATCHED' 
-    },
-  ]);
+  const initialAlerts = [
+    { id: 1042, district: 'Chennai', ward: 'Teynampet', disease: 'Dengue', risk: 'CRITICAL', trigger: 'LSTM > 95th Percentile + Rainfall threshold', confidence: '96.8%', primaryFactor: 'Unseasonal rainfall (84mm) + high larval density in Zone 9.', recommendation: 'Immediate fogging and source reduction in Teynampet. Alert PHCs.', affected: 45000, date: 'Today, 08:30 AM', status: 'PENDING DISPATCH' },
+    { id: 1041, district: 'Chennai', ward: 'Kodambakkam', disease: 'Dengue', risk: 'CRITICAL', trigger: 'EMRI 108 Fever Call Cluster', confidence: '92.4%', primaryFactor: 'Abnormal cluster of fever calls (108) reported from Ward 127.', recommendation: 'Door-to-door screening in Kodambakkam. Mobile medical units deployment.', affected: 9800, date: 'Today, 09:15 AM', status: 'PENDING DISPATCH' },
+    { id: 1043, district: 'Chennai', ward: 'Ambattur', disease: 'Scrub Typhus', risk: 'HIGH', trigger: 'Community Report Cluster Detected', confidence: '88.5%', primaryFactor: 'Community symptoms matching scrub typhus in slum areas.', recommendation: 'Targeted antibiotic stocking at Ambattur PHC. Public awareness on sanitation.', affected: 12000, date: 'Today, 09:15 AM', status: 'PENDING DISPATCH' },
+    { id: 1044, district: 'Chennai', ward: 'Anna Nagar', disease: 'Gastroenteritis', risk: 'HIGH', trigger: 'Water Contamination Signal (TWB)', confidence: '91.2%', primaryFactor: 'Low chlorine levels detected in secondary water mains.', recommendation: 'Initiate water tank cleaning drive. Distribute chlorine tablets.', affected: 25000, date: 'Today, 10:30 AM', status: 'PENDING DISPATCH' },
+    { id: 1045, district: 'Chennai', ward: 'Royapuram', disease: 'Heat Stroke', risk: 'WATCH', trigger: 'Heat Index > 42°C Forecast', confidence: '95.0%', primaryFactor: 'Sustained high temperatures in high-density urban canyons.', recommendation: 'Setup cool-roof centers. Public advisory on hydration.', affected: 60000, date: 'Tomorrow (Forecast)', status: 'PENDING DISPATCH' },
+    { id: 1046, district: 'Chennai', ward: 'Perambur', disease: 'Respiratory', risk: 'WATCH', trigger: 'PM2.5 Level Breached (150+)', confidence: '82.7%', primaryFactor: 'High AQI combined with low wind speed in industrial periphery.', recommendation: 'Health advisory for vulnerable populations. Mask distribution.', affected: 35000, date: 'Today, 11:00 AM', status: 'PENDING DISPATCH' },
+    { id: 1038, district: 'Coimbatore', ward: 'Zone 4', disease: 'Respiratory', risk: 'WATCH', trigger: 'Syndromic surveillance spike at PHC', confidence: '84.2%', primaryFactor: 'PM2.5 levels exceeding WHO limits for 48 hours.', recommendation: 'Air quality advisory for elderly. Stock inhalers at Zone 4 PHCs.', affected: 8500, date: 'Yesterday', status: 'DISPATCHED' },
+  ];
+
+  const [activeAlerts, setActiveAlerts] = useState(initialAlerts);
 
   useEffect(() => {
     if (filterWard) {
@@ -94,8 +49,6 @@ export default function AlertsDispatchPage() {
       }
     }
   }, [filterWard]);
-
-  const [isSending, setIsSending] = useState(false);
 
   const handleDispatch = async (id: number, type: 'SMS' | 'EMAIL') => {
     if (type === 'EMAIL') {
@@ -133,14 +86,14 @@ export default function AlertsDispatchPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: `Nalam AI Alert: High ${alert?.disease} risk in ${alert?.ward}. Take precautions.`,
-            targetPhones: ['+910000000000'] // User should replace with real numbers
+            targetPhones: [testPhone] 
           })
         });
         if (res.ok) {
           setActiveAlerts(prev => prev.map(a => a.id === id ? { ...a, status: 'DISPATCHED' } : a));
         } else {
           const data = await res.json();
-          window.alert(`SMS Failed: ${data.error}. You need real Twilio keys in .env.local`);
+          window.alert(`SMS Failed: ${data.error}. \n\nReason: ${data.details || 'Check .env.local keys'}`);
         }
       } catch (err) {
         console.error(err);
@@ -190,7 +143,7 @@ export default function AlertsDispatchPage() {
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
                     alert.risk === 'CRITICAL' ? 'bg-red-900/50 text-red-400 border border-red-800' :
                     alert.risk === 'HIGH' ? 'bg-orange-900/50 text-orange-400 border border-orange-800' :
-                    'bg-yellow-900/50 text-yellow-400 border border-yellow-800'
+                    'bg-yellow-900/50 text-yellow-400 border border-yellow-700'
                   }`}>
                     {alert.risk} - {alert.disease}
                   </span>
@@ -217,7 +170,6 @@ export default function AlertsDispatchPage() {
                 const alert = activeAlerts.find(a => a.id === selectedAlert);
                 return (
                   <>
-                    {/* Header */}
                     <div className={`p-6 border-b ${
                       alert?.risk === 'CRITICAL' ? 'bg-gov-red/10 border-gov-red/30' : 
                       alert?.risk === 'HIGH' ? 'bg-gov-orange/10 border-gov-orange/30' : 
@@ -238,7 +190,6 @@ export default function AlertsDispatchPage() {
                       </div>
                     </div>
 
-                    {/* Explain Risk Section */}
                     <div className="p-6 border-b border-gov-border">
                       <h3 className="text-sm font-bold text-gov-teal uppercase tracking-wider mb-4 flex items-center gap-2">
                         <Eye size={16}/> Explain Risk (AI Triage)
@@ -251,7 +202,6 @@ export default function AlertsDispatchPage() {
                       </div>
                     </div>
 
-                    {/* Dispatch Form */}
                     <div className="p-6 flex-1 flex flex-col">
                       <h3 className="text-sm font-bold text-gov-gold uppercase tracking-wider mb-4 flex items-center gap-2">
                         <Send size={16}/> Dispatch Communications
@@ -264,6 +214,18 @@ export default function AlertsDispatchPage() {
                             <h4 className="text-white font-bold flex items-center gap-2"><Smartphone size={16} className="text-gov-blue"/> Target: Citizens</h4>
                             <span className="text-xs bg-gov-blue/20 text-gov-blue px-2 py-1 rounded font-bold">12,408 Subs</span>
                           </div>
+                          
+                          <div className="mb-4">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Test Phone Number</label>
+                            <input 
+                              type="text" 
+                              value={testPhone} 
+                              onChange={e => setTestPhone(e.target.value)}
+                              placeholder="+91..."
+                              className="w-full bg-black/50 border border-gray-800 rounded px-2 py-1.5 text-xs text-white focus:border-gov-blue outline-none"
+                            />
+                          </div>
+
                           <div className="bg-gray-900 p-3 rounded text-sm text-gray-400 mb-4 h-24 overflow-y-auto">
                             "நலம் AI எச்சரிக்கை: உங்கள் பகுதியில் {alert?.disease} ஆபத்து அதிகமாக உள்ளது. கொசு உற்பத்தியை தடுக்கவும். காய்ச்சல் வந்தால் உடனடியாக அருகில் உள்ள அரசு மருத்துவமனை (PHC) செல்லவும்."
                           </div>
@@ -272,7 +234,7 @@ export default function AlertsDispatchPage() {
                             className={`w-full py-2 rounded font-bold flex items-center justify-center gap-2 transition-colors ${alert?.status === 'DISPATCHED' ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gov-blue hover:bg-blue-600 text-white shadow-md'}`} 
                             disabled={alert?.status === 'DISPATCHED' || isSending}
                           >
-                            <Smartphone size={16}/> Send Mass SMS
+                            <Smartphone size={16}/> {isSending ? 'Sending...' : 'Send Mass SMS'}
                           </button>
                         </div>
 
