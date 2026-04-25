@@ -41,11 +41,11 @@ export async function POST(request: Request) {
             const [embedding1, embedding2] = await Promise.all([
                 hf.featureExtraction({
                     model: 'facebook/convnext-base-224-22k',
-                    inputs: faceBuffer,
+                    inputs: faceBuffer as any,
                 }),
                 hf.featureExtraction({
                     model: 'facebook/convnext-base-224-22k',
-                    inputs: screenshotBuffer,
+                    inputs: screenshotBuffer as any,
                 })
             ]);
 
