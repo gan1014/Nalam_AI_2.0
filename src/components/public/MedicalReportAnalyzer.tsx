@@ -60,6 +60,36 @@ const MedicalReportAnalyzer = () => {
     }
   };
 
+  const handleDownload = () => {
+    if (!results) return;
+    const element = document.createElement("a");
+    const file = new Blob([`NALAM AI - MEDICAL REPORT ANALYSIS\nType: ${reportType}\nDate: ${new Date().toLocaleDateString()}\n\n${results}`], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = `Nalam_AI_Analysis_${reportType}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const handleShare = async () => {
+    if (!results) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Nalam AI Medical Analysis',
+          text: `Check out my Nalam AI medical report analysis for ${reportType}`,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      // Fallback: Copy to clipboard
+      await navigator.clipboard.writeText(results);
+      alert('Analysis copied to clipboard!');
+    }
+  };
+
   const reportTypes = [
     { id: 'CBC', label: 'CBC Blood Count' },
     { id: 'DENGUE', label: 'Dengue NS1/IgM' },
@@ -220,10 +250,16 @@ const MedicalReportAnalyzer = () => {
                   </div>
 
                   <div className="p-6 bg-gray-50 border-t border-gray-100 flex flex-wrap gap-4">
-                    <button className="flex-1 bg-white border border-gray-200 text-gov-navy font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shadow-sm">
-                      <Download size={18} /> Download PDF
+                    <button 
+                      onClick={handleDownload}
+                      className="flex-1 bg-white border border-gray-200 text-gov-navy font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shadow-sm"
+                    >
+                      <Download size={18} /> Download Results
                     </button>
-                    <button className="flex-1 bg-white border border-gray-200 text-gov-navy font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shadow-sm">
+                    <button 
+                      onClick={handleShare}
+                      className="flex-1 bg-white border border-gray-200 text-gov-navy font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shadow-sm"
+                    >
                       <Share2 size={18} /> Share Analysis
                     </button>
                     <button 
