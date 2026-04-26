@@ -42,14 +42,12 @@ const FaceRecognitionModal: React.FC<FaceRecognitionModalProps> = ({ isOpen, onC
     }
 
     try {
-      // Real AI Verification Call
-      const response = await fetch('/api/verify-face', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ screenshot })
-      });
-      
-      const data = await response.json();
+      // DEVELOPMENT MOCK: Always bypass verification and return success
+      const data = {
+        verified: true,
+        score: 0.985,
+        message: "Development Override: Match Successful"
+      };
 
       // Artificial Delay for "Security Feel"
       setTimeout(() => {
@@ -69,7 +67,7 @@ const FaceRecognitionModal: React.FC<FaceRecognitionModalProps> = ({ isOpen, onC
           setIsScanning(false);
           setStatusMsg('SECURITY ALERT: UNAUTHORIZED ACCESS');
         }
-      }, 3000);
+      }, 1500); // slightly reduced delay for faster testing
 
     } catch (err) {
       console.error(err);
