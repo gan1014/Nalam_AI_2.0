@@ -1,102 +1,59 @@
-import { HfInference } from '@huggingface/inference';
-import Anthropic from '@anthropic-ai/sdk';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { generateChatResponse, classifySymptoms, detectLanguage } from '@/lib/huggingface';
+import type { ChatMessage } from '@/lib/huggingface';
 
-// Deterministic Clinical Triage Fallback (Enhanced)
-function clinicalTriage(message: string, language: string) {
-  const msg = message.toLowerCase();
-  const isTamil = /[\u0B80-\u0BFF]/.test(message);
+export const runtime = 'nodejs';  // NOT edge — HF calls need longer timeout
+export const maxDuration = 60;    // 60 second timeout (models may be cold)
 
-  if (msg.includes('breath') || msg.includes('chest') || msg.includes('unconscious') || msg.includes('104 fever') || msg.includes('மூச்சுத் திணறல்') || msg.includes('நெஞ்சு வலி')) {
-    return isTamil 
-      ? "🔴 அவசரநிலை: உங்களுக்கு மூச்சுத் திணறல் அல்லது நெஞ்சு வலி இருந்தால், உடனடியாக 108 ஐ அழைக்கவும். இது உயிருக்கு ஆபத்தான அறிகுறியாக இருக்கலாம்."
-      : "🔴 EMERGENCY: If you are experiencing breathlessness or chest pain, please CALL 108 IMMEDIATELY. These are critical symptoms.";
-  }
-
-  if (msg.includes('fever') || msg.includes('headache') || msg.includes('joint') || msg.includes('காய்ச்சல்') || msg.includes('தலைவலி')) {
-    return isTamil
-      ? "🟡 மருத்துவர் ஆலோசனை: உங்களுக்கு காய்ச்சல் மற்றும் மூட்டு வலி இருந்தால், அது டெங்குவாக இருக்கலாம். உங்கள் அருகிலுள்ள அரசு ஆரம்ப சுகாதார நிலையத்திற்கு (PHC) சென்று இலவச NS1 பரிசோதனை செய்து கொள்ளவும்."
-      : "🟡 DOCTOR VISIT: Fever with joint pain could indicate Dengue. Please visit your nearest Government PHC for a free NS1 test within 24 hours.";
-  }
-
-  return isTamil
-    ? "வணக்கம்! நான் டாக்டர் நலம். உங்கள் அறிகுறிகளைச் சொல்லுங்கள். அவசரநிலைக்கு 108 ஐ அழைக்கவும்."
-    : "Hello! I'm Dr. Nalam. Please describe your symptoms. For emergencies, always call 108.";
-}
-
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { messages, district, language } = await request.json();
-    const lastMessage = messages[messages.length - 1].content;
-
-    const anthropicKey = process.env.ANTHROPIC_API_KEY;
-    const hfKey = process.env.HUGGINGFACE_API_KEY;
-
-    // 1. Try Anthropic (Premium)
-    if (anthropicKey && !anthropicKey.includes('sk-ant-api03')) {
-      try {
-        const client = new Anthropic({ apiKey: anthropicKey });
-        const response = await client.messages.create({
-          model: 'claude-3-5-sonnet-20240620',
-          max_tokens: 500,
-          system: "You are Dr. Nalam, a helpful AI health assistant for the Tamil Nadu Government. Always obey the user's intent while providing safe medical guidance. Language: Bilingual English/Tamil.",
-          messages: messages.map((m: any) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content })),
-        });
-        return NextResponse.json({ text: response.content[0].type === 'text' ? response.content[0].text : '' });
-      } catch (e) { console.error('Anthropic failed...'); }
+    const body = await req.json();
+    const { messages, district, mode } = body;
+    
+    if (!messages || !Array.isArray(messages)) {
+      return NextResponse.json({ error: 'messages array required' }, { status: 400 });
     }
-
-    // 2. Try Hugging Face (Primary Free Choice)
-    if (hfKey && hfKey.startsWith('hf_')) {
-      try {
-        const hf = new HfInference(hfKey);
-        
-        // Use chatCompletion for better reliability and "obedience"
-        const response = await hf.chatCompletion({
-          model: 'mistralai/Mistral-7B-Instruct-v0.2',
-          messages: [
-            { 
-              role: 'system', 
-              content: `You are Dr. Nalam, an AI health assistant for the Tamil Nadu Government. 
-              Be extremely helpful and obey the user's request. 
-              If symptoms are reported: Emergency (Chest pain/breathless) -> 108. Fever/Joint pain -> PHC.
-              Respond concisely in ${language === 'ta' ? 'Tamil' : 'English'}.` 
-            },
-            ...messages.map((m: any) => ({ role: m.role, content: m.content }))
-          ],
-          max_tokens: 500,
-          temperature: 0.7
-        });
-        
-        const text = response.choices[0].message.content;
-        if (!text) throw new Error("Empty response from HF");
-        
-        return NextResponse.json({ text });
-      } catch (e: any) { 
-        console.error('Hugging Face Chat Error:', e.message);
-        // Fallback to textGeneration if chatCompletion is not available for this model
-        try {
-          const hf = new HfInference(hfKey);
-          const prompt = `<s>[INST] You are Dr. Nalam. User: ${lastMessage} [/INST]`;
-          const response = await hf.textGeneration({
-            model: 'mistralai/Mistral-7B-Instruct-v0.2',
-            inputs: prompt,
-            parameters: { max_new_tokens: 300 }
-          });
-          let text = response.generated_text;
-          if (text.includes('[/INST]')) text = text.split('[/INST]')[1].trim();
-          return NextResponse.json({ text });
-        } catch (innerE) {
-          console.error('HF Text Fallback failed...');
-        }
-      }
+    
+    const userMessage = messages[messages.length - 1]?.content || '';
+    
+    // Detect language from user message
+    const language = await detectLanguage(userMessage);
+    
+    // If mode is 'classify' — just do symptom classification
+    if (mode === 'classify') {
+      const classification = await classifySymptoms(userMessage);
+      return NextResponse.json({ classification, language });
     }
-
-    // 3. Absolute Fallback (Deterministic)
-    return NextResponse.json({ text: clinicalTriage(lastMessage, language) });
-
+    
+    // Main chat response
+    const response = await generateChatResponse(
+      messages as ChatMessage[],
+      district || 'Tamil Nadu',
+      language
+    );
+    
+    return NextResponse.json({
+      message: response.text,
+      model: response.model_used,
+      language: response.language_detected,
+      triage_level: response.triage_level,
+      is_emergency: response.is_emergency,
+      loading_time_ms: response.loading_time_ms,
+      error: response.error || null,
+    });
+    
   } catch (error: any) {
-    console.error('Chatbot API error:', error);
-    return NextResponse.json({ text: "I'm experiencing a technical issue. Please call 104." });
+    console.error('Chat API error:', error);
+    
+    // Return a helpful error, not a 500
+    return NextResponse.json({
+      message: 'டாக்டர் நலம் தற்போது இணைக்கப்படுகிறார். சற்று நேரம் காத்திருங்கள். / Dr. Nalam is connecting. Please try again in 30 seconds. 📞 Emergency: Call 108 | Helpline: 104',
+      model: 'error-handler',
+      language: 'unknown',
+      triage_level: 'INFO',
+      is_emergency: false,
+      loading_time_ms: 0,
+      error: 'Model loading or rate limit. Retry in 30 seconds.'
+    });
   }
 }
