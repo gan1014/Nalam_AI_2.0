@@ -2,7 +2,7 @@ import React from 'react';
 import DiseaseRiskChecker from '@/components/public/DiseaseRiskChecker';
 import VoiceSymptomChecker from '@/components/public/VoiceSymptomChecker';
 import SMSSubscription from '@/components/public/SMSSubscription';
-import StatsTicker from '@/components/public/StatsTicker';
+import GovTicker from '@/components/public/GovTicker';
 import DiseaseInfoGrid from '@/components/public/DiseaseInfoGrid';
 import GovSchemes from '@/components/public/GovSchemes';
 import CommunitySurgeMap from '@/components/public/CommunitySurgeMap';
@@ -15,7 +15,7 @@ export default function PublicPortal() {
   return (
     <div className="w-full flex flex-col min-h-screen bg-gov-offwhite">
       <GovHeader />
-      <StatsTicker />
+      <GovTicker />
       
       {/* HERO SECTION */}
       <section className="bg-gradient-to-br from-gov-navy via-gov-blue to-slate-900 pt-20 pb-24 px-4 relative overflow-hidden">
@@ -31,7 +31,7 @@ export default function PublicPortal() {
 
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white px-4 py-1.5 rounded-full text-sm font-semibold mb-6 backdrop-blur-sm">
             <ShieldCheck size={16} className="text-gov-gold" />
-            AI-powered 14-21 day advance warning • 38 Districts • 5 Diseases • 77M Protected
+            🟢 Live Disease Surveillance Active • 38 Districts Monitored • Free Health Alerts via SMS • Dr. Nalam AI Available 24/7
           </div>
           
           <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold font-tamil text-white leading-tight mb-6 drop-shadow-lg max-w-4xl mx-auto">
